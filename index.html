@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeterinerAI: Interactive Pitch Deck</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices:
+        - Report Info: Pitch Deck Slide 2 (Challenge) -> Goal: Inform -> Viz/Presentation: Bulleted list in clear sections -> Interaction: None -> Justification: Clear presentation of problems.
+        - Report Info: Pitch Deck Slide 3 (Solution) -> Goal: Inform -> Viz/Presentation: Key features highlighted -> Interaction: None -> Justification: Concise solution overview.
+        - Report Info: Pitch Deck Slide 4 (How it Works) -> Goal: Organize/Inform -> Viz/Presentation: HTML/CSS structured flow diagram (using Tailwind grid/flex and borders/Unicode arrows) -> Interaction: None -> Justification: Visually represent the process simply without complex graphics.
+        - Report Info: Pitch Deck Slides 5, 6, 7 (Benefits) -> Goal: Compare/Inform -> Viz/Presentation: Card layout for each stakeholder group -> Interaction: None -> Justification: Easy comparison and digestion of benefits.
+        - Report Info: Pitch Deck Slide 8 (Traction) -> Goal: Inform/Engage -> Viz/Presentation: Textual highlights + Chart.js Bar Chart (Canvas) showing user breakdown (e.g., 50 Farmers, 30 Vets, 20 Assistants - Fictional breakdown for demo) -> Interaction: Chart tooltips -> Justification: Quantify traction visually and make it more engaging.
+        - Report Info: Pitch Deck Slide 9 (Vision) -> Goal: Inform -> Viz/Presentation: Bulleted list -> Interaction: None -> Justification: Clear presentation of future plans.
+        - Report Info: Pitch Deck Slide 10 (Team) -> Goal: Inform -> Viz/Presentation: Text bio -> Interaction: None -> Justification: Introduce the founder.
+        - Report Info: Pitch Deck Slide 11 (Contact) -> Goal: Engage -> Viz/Presentation: Clickable links -> Interaction: Navigation to external sites/mail client -> Justification: Facilitate contact.
+        CONFIRMING NO SVG/Mermaid, supporting the DESIGNED structure. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Tailwind's default sans-serif stack often includes Inter */
+        }
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Custom styles for a warm earth tone palette */
+        .bg-primary-beige { background-color: #F5F5DC; } /* Beige */
+        .text-primary-green { color: #556B2F; } /* Dark Olive Green */
+        .text-secondary-brown { color: #8B4513; } /* Saddle Brown */
+        .border-accent-terracotta { border-color: #E2725B; } /* Terracotta */
+        .bg-accent-terracotta { background-color: #E2725B; }
+        .hover-bg-accent-terracotta-dark:hover { background-color: #D2604A; }
+
+        .nav-link {
+            @apply px-3 py-2 rounded-md text-sm font-medium text-primary-green hover:bg-primary-green hover:text-primary-beige transition-colors;
+        }
+        .section-title {
+            @apply text-3xl font-bold text-primary-green mb-4 text-center;
+        }
+        .section-subtitle {
+            @apply text-xl text-secondary-brown mb-8 text-center;
+        }
+        .card {
+            @apply bg-white p-6 rounded-lg shadow-lg transition-transform hover:scale-105;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Max width for the chart */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 400px; /* Max height */
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .flow-step {
+            @apply bg-white p-4 rounded-lg shadow-md text-center flex flex-col justify-center items-center min-h-[120px];
+        }
+        .flow-arrow {
+            @apply text-3xl text-primary-green mx-4 hidden md:flex items-center;
+        }
+        .flow-arrow-mobile {
+            @apply text-3xl text-primary-green my-4 md:hidden flex justify-center;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-primary-beige text-secondary-brown">
+
+    <nav class="bg-white/80 backdrop-blur-md shadow-md fixed w-full z-10 top-0">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-primary-green">VeterinerAI</span>
+                    <img src="logo.png" alt="VeterinerAI Logo" class="h-10 w-auto">
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#challenge" class="nav-link">The Challenge</a>
+                        <a href="#solution" class="nav-link">Solution</a>
+                        <a href="#howitworks" class="nav-link">How It Works</a>
+                        <a href="#benefits" class="nav-link">Benefits</a>
+                        <a href="#traction" class="nav-link">Traction</a>
+                        <a href="#vision" class="nav-link">Vision</a>
+                        <a href="#team" class="nav-link">Team</a>
+                        <a href="#contact" class="nav-link">Contact</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-primary-green hover:text-white hover:bg-primary-green focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                        <span class="sr-only">Open main menu</span>
+                        &#9776; </button>
+                </div>
+            </div>
+        </div>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#challenge" class="block nav-link text-center">The Challenge</a>
+                <a href="#solution" class="block nav-link text-center">Solution</a>
+                <a href="#howitworks" class="block nav-link text-center">How It Works</a>
+                <a href="#benefits" class="block nav-link text-center">Benefits</a>
+                <a href="#traction" class="block nav-link text-center">Traction</a>
+                <a href="#vision" class="block nav-link text-center">Vision</a>
+                <a href="#team" class="block nav-link text-center">Team</a>
+                <a href="#contact" class="block nav-link text-center">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-16">
+        <section id="hero" class="bg-white py-20">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-5xl font-bold text-primary-green">VeterinerAI: Intelligent Health for Every Animal</h1>
+                <p class="mt-4 text-2xl text-secondary-brown">Smarter Care, Healthier Animals, Thriving Farms & Practices.</p>
+            </div>
+        </section>
+
+        <section id="challenge" class="py-16">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="section-title">The Challenge We All Face</h2>
+                <p class="section-subtitle">Identifying current pressures and missed opportunities in animal health management for various stakeholders.</p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="card">
+                        <h3 class="text-2xl font-semibold text-primary-green mb-3">🌾 For Farmers:</h3>
+                        <ul class="list-disc list-inside space-y-2 text-secondary-brown">
+                            <li>Timely disease detection is crucial but difficult.</li>
+                            <li>Access to immediate, affordable veterinary advice can be limited.</li>
+                            <li>Optimizing herd/flock health directly impacts productivity and profitability.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-2xl font-semibold text-primary-green mb-3">🩺 For Veterinarians:</h3>
+                        <ul class="list-disc list-inside space-y-2 text-secondary-brown">
+                            <li>Heavy workloads and the need to cover large areas.</li>
+                            <li>Desire to provide proactive, preventative care but often constrained by reactive demands.</li>
+                            <li>Integrating new data streams efficiently is a growing need.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-2xl font-semibold text-primary-green mb-3">🧑‍🌾 For Feed Supplier Technical Assistants:</h3>
+                        <ul class="list-disc list-inside space-y-2 text-secondary-brown">
+                            <li>Providing the best nutritional advice requires understanding the animal's health status.</li>
+                            <li>Early identification of health-related feed issues can improve client outcomes.</li>
+                            <li>Supporting clients with data-driven insights adds significant value.</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="mt-12 text-center text-xl font-semibold text-primary-green">The Common Thread? The need for more accessible, intelligent, and proactive animal health management.</p>
+            </div>
+        </section>
+
+        <section id="solution" class="py-16 bg-white">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="section-title">Introducing VeterinerAI: Your AI-Powered Animal Health Partner</h2>
+                <p class="section-subtitle">VeterinerAI revolutionizes veterinary services by leveraging Artificial Intelligence to provide cost-effective, scalable, and data-driven animal health solutions.</p>
+                <div class="grid md:grid-cols-3 gap-8 text-center">
+                    <div class="p-6">
+                        <div class="text-5xl mb-4">💡</div>
+                        <h3 class="text-xl font-semibold text-primary-green mb-2">Accessible Expertise</h3>
+                        <p class="text-secondary-brown">Putting AI-driven insights into the hands of those who need them most.</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="text-5xl mb-4">🛡️</div>
+                        <h3 class="text-xl font-semibold text-primary-green mb-2">Proactive & Preventative</h3>
+                        <p class="text-secondary-brown">Shifting from reactive treatment to proactive health management.</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="text-5xl mb-4">📊</div>
+                        <h3 class="text-xl font-semibold text-primary-green mb-2">Data-Driven Decisions</h3>
+                        <p class="text-secondary-brown">Enabling smarter choices for better outcomes.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="howitworks" class="py-16">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="section-title">Intelligent Simplicity: The Power Behind VeterinerAI</h2>
+                <p class="section-subtitle">A straightforward process transforming raw data into valuable health insights for animal well-being.</p>
+                <div class="flex flex-col md:flex-row justify-center items-stretch mt-10 space-y-6 md:space-y-0 md:space-x-0">
+                    <div class="flow-step">
+                        <span class="text-2xl font-bold text-primary-green mb-2">1. Easy Data Input</span>
+                        <p class="text-sm text-secondary-brown">Farmers and assistants input observations, symptoms, images, and animal data via our user-friendly mobile app.</p>
+                    </div>
+                    <div class="flow-arrow-mobile md:hidden">⬇️</div>
+                    <div class="flow-arrow hidden md:flex">➡️</div>
+                    <div class="flow-step">
+                        <span class="text-2xl font-bold text-primary-green mb-2">2. Advanced AI Analysis</span>
+                        <p class="text-sm text-secondary-brown">Sophisticated AI algorithms analyze data, cross-referencing with veterinary knowledge bases and identifying patterns.</p>
+                    </div>
+                    <div class="flow-arrow-mobile md:hidden">⬇️</div>
+                    <div class="flow-arrow hidden md:flex">➡️</div>
+                    <div class="flow-step">
+                        <span class="text-2xl font-bold text-primary-green mb-2">3. Actionable Insights</span>
+                        <p class="text-sm text-secondary-brown">VeterinerAI provides clear recommendations: early warnings, care steps, vet consultation suggestions, and data for discussions.</p>
+                    </div>
+                </div>
+                <p class="mt-12 text-center text-xl font-semibold text-primary-green">Think of it as a "Super Intelligent Assistant" for animal well-being.</p>
+            </div>
+        </section>
+
+        <section id="benefits" class="py-16 bg-white">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="section-title">Empowering Our Stakeholders</h2>
+                <p class="section-subtitle">Detailing the specific advantages VeterinerAI brings to farmers, veterinarians, and feed supplier technical assistants.</p>
+                <div class="space-y-12">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-primary-green mb-6 text-center">🌾 Benefits for Farmers: Healthier Animals, Better Yields</h3>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="card"><strong>Early Disease Detection:</strong> Identify issues sooner, reducing costs and losses.</div>
+                            <div class="card"><strong>Improved Productivity:</strong> Healthier animals mean better growth and success.</div>
+                            <div class="card"><strong>Cost-Effective Care:</strong> Initial guidance potentially reducing unnecessary vet visits.</div>
+                            <div class="card"><strong>Informed Decisions:</strong> Make management choices based on data.</div>
+                            <div class="card"><strong>24/7 Initial Support:</strong> Preliminary insights anytime, anywhere.</div>
+                        </div>
+                        <p class="mt-6 text-center italic text-secondary-brown">"VeterinerAI helps me stay ahead of problems and keep my animals thriving." - Hypothetical Farmer</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-primary-green mb-6 text-center">🩺 Benefits for Veterinarians: Enhancing Your Expertise & Reach</h3>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="card"><strong>Data-Rich Consultations:</strong> More structured client info for efficient visits.</div>
+                            <div class="card"><strong>Focus on Complex Cases:</strong> Delegate initial triage for common issues.</div>
+                            <div class="card"><strong>Proactive Health Monitoring:</strong> Partner for preventative strategies.</div>
+                            <div class="card"><strong>Extend Your Reach:</strong> Offer tech-enabled client support.</div>
+                            <div class="card"><strong>Decision Support Tool:</strong> AI insights to augment diagnostics.</div>
+                        </div>
+                        <p class="mt-6 text-center italic text-secondary-brown">"VeterinerAI allows me to have more informed conversations and focus my expertise." - Hypothetical Vet</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-primary-green mb-6 text-center">🧑‍🌾 Benefits for Feed Supplier Technical Assistants: Data-Driven Synergy</h3>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
+                            <div class="card"><strong>Holistic Animal Assessment:</strong> Deeper health insights for tailored nutrition.</div>
+                            <div class="card"><strong>Early ID of Feed-Related Issues:</strong> Correlate health data with feeding programs.</div>
+                            <div class="card"><strong>Enhanced Client Relationships:</strong> Data-driven support strengthens advisory role.</div>
+                            <div class="card"><strong>Improved Outcomes:</strong> Contribute to overall animal health and client satisfaction.</div>
+                        </div>
+                        <p class="mt-6 text-center italic text-secondary-brown">"With VeterinerAI, I can better connect our feed solutions to animal health." - Hypothetical Assistant</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="traction" class="py-16">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="section-title">Traction & Validation - You Are Part of Our Story!</h2>
+                <p class="section-subtitle">Highlighting our early success and the crucial role of our initial users in shaping VeterinerAI.</p>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="text-secondary-brown space-y-4">
+                        <p class="text-lg"><span class="font-bold text-2xl text-primary-green">100+ Signed-Up Users:</span> We're thrilled to have over 100 farmers, veterinarians, and animal feed supplier technical assistants already on board and providing valuable feedback!</p>
+                        <p><strong>Diverse User Base:</strong> This includes dairy, poultry, mixed farms, and pet owners.</p>
+                        <p><strong>Active Feedback Loop:</strong> Your insights are crucial as we continuously refine and improve VeterinerAI.</p>
+                        <p><strong>Real-World Application:</strong> VeterinerAI is already being used in real farm and clinical settings.</p>
+                        <p class="mt-4 text-xl font-semibold text-primary-green">Your participation is validating the need and shaping the future of VeterinerAI!</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="tractionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="vision" class="py-16 bg-white">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="section-title">Our Vision: Intelligent, Accessible Animal Health for All</h2>
+                <p class="section-subtitle">Outlining our ambitions for the future development and impact of VeterinerAI in the animal health sector.</p>
+                <ul class="grid md:grid-cols-2 gap-x-8 gap-y-4 list-none p-0 text-secondary-brown">
+                    <li class="flex items-start"><span class="text-primary-green text-2xl mr-3">🚀</span> Expanding AI Capabilities: Continuously enhancing models for greater accuracy and broader diagnostic support.</li>
+                    <li class="flex items-start"><span class="text-primary-green text-2xl mr-3">🔗</span> Integration with Farm Management Systems: Seamless data flow for holistic farm insights.</li>
+                    <li class="flex items-start"><span class="text-primary-green text-2xl mr-3">🔮</span> Predictive Analytics: Moving beyond detection to *prediction* of health issues.</li>
+                    <li class="flex items-start"><span class="text-primary-green text-2xl mr-3">🌿</span> Supporting Sustainable Agriculture: Promoting animal health as a cornerstone of efficient food production.</li>
+                    <li class="flex items-start"><span class="text-primary-green text-2xl mr-3">🌍</span> Global Reach: Making advanced veterinary intelligence accessible worldwide.</li>
+                </ul>
+                <p class="mt-12 text-center text-xl font-semibold text-primary-green">We are committed to building the leading AI platform for animal health and well-being.</p>
+            </div>
+        </section>
+
+        <section id="team" class="py-16">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="section-title">Driven by Passion & Experience</h2>
+                <p class="section-subtitle">Introducing the founder behind VeterinerAI and the personal experience that fuels the mission.</p>
+                <div class="bg-white p-8 rounded-lg shadow-xl inline-block">
+                    <img src="my_photo.jpg" alt="Mustafa Yildirim" class="w-32 h-32 rounded-full object-cover mx-auto mb-4">
+                    <h3 class="text-2xl font-semibold text-primary-green">Mustafa Yildirim, Founder</h3>
+                    <blockquote class="mt-4 italic text-secondary-brown space-y-2">
+                        <p>"Born into a family-owned feed supply business, I witnessed firsthand the critical link between animal health and farmer livelihoods."</p>
+                        <p>"This deep-rooted understanding, combined with a passion for technological advancement, fueled my drive to create VeterinerAI."</p>
+                        <p>"My mission is to bridge experiential knowledge with cutting-edge AI to deliver the next leap forward in agricultural and pet health technology."</p>
+                    </blockquote>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-16 bg-primary-green text-primary-beige">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-bold mb-4">Let's Shape the Future of Animal Health, Together!</h2>
+                <p class="text-xl mb-8">We invite you to continue this journey with us. Your feedback, collaboration, and support are invaluable.</p>
+                <div class="grid md:grid-cols-3 gap-8 mb-8">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-2">🗣️ Continue Providing Feedback</h4>
+                        <p class="text-sm">Your experiences help us grow and improve.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold mb-2">🤝 Spread the Word</h4>
+                        <p class="text-sm">Help us reach more professionals who can benefit.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold mb-2">💡 Explore Partnerships</h4>
+                        <p class="text-sm">Open to collaborations that enhance animal well-being.</p>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4">Stay Connected:</h3>
+                <div class="space-x-4">
+                    <a href="[https://apps.apple.com/app/id6743999091]" target="_blank" class="inline-block bg-accent-terracotta text-white px-6 py-3 rounded-md font-semibold hover-bg-accent-terracotta-dark transition-colors">iOS App</a>
+                    <a href="[https://play.google.com/store/apps/details?id=com.hasbektarim.veterinerai&pcampaignid=web_share ]" target="_blank" class="inline-block bg-accent-terracotta text-white px-6 py-3 rounded-md font-semibold hover-bg-accent-terracotta-dark transition-colors">Android App</a>
+                    <a href="mailto:[myildirim.ai@gmail.com]" class="inline-block bg-accent-terracotta text-white px-6 py-3 rounded-md font-semibold hover-bg-accent-terracotta-dark transition-colors">Email Us</a>
+                    <a href="[https://www.linkedin.com/in/mustafa-yildirim-337a54148/]" target="_blank" class="inline-block bg-accent-terracotta text-white px-6 py-3 rounded-md font-semibold hover-bg-accent-terracotta-dark transition-colors">LinkedIn</a>
+                </div>
+                <p class="mt-12 text-2xl font-bold">Thank You!</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 py-8 text-center">
+        <p class="text-secondary-brown">&copy; <span id="currentYear"></span> VeterinerAI. All rights reserved.</p>
+        <p class="text-sm text-gray-500 mt-1">Intelligent Health for Every Animal.</p>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when a link is clicked
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Traction Chart
+        const ctx = document.getElementById('tractionChart').getContext('2d');
+        // Fictional data for demonstration as it's not in the source pitch deck
+        const tractionData = {
+            labels: ['Farmers', 'Veterinarians', 'Feed Tech Assistants', 'Pet Owners'],
+            datasets: [{
+                label: 'Number of Signed-Up Users',
+                data: [35, 25, 15, 25], // Total 100 users, example breakdown
+                backgroundColor: [
+                    'rgba(85, 107, 47, 0.7)', // Dark Olive Green
+                    'rgba(139, 69, 19, 0.7)',  // Saddle Brown
+                    'rgba(226, 114, 91, 0.7)', // Terracotta
+                    'rgba(128, 128, 128, 0.7)'  // Gray for Pet Owners
+                ],
+                borderColor: [
+                    'rgba(85, 107, 47, 1)',
+                    'rgba(139, 69, 19, 1)',
+                    'rgba(226, 114, 91, 1)',
+                    'rgba(128, 128, 128, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+        new Chart(ctx, {
+            type: 'bar',
+            data: tractionData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Users'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'User Type'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Hiding legend as it's a single dataset
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y + ' users';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Set current year in footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // Replace placeholder links (IMPORTANT: Update these with actual links)
+        document.querySelectorAll('a[href="[Your Website Link]"]').forEach(a => a.href = '#'); // Replace '#' with actual link
+        document.querySelectorAll('a[href="[Link to App Store Page]"]').forEach(a => a.href = '#'); // Replace '#' with actual link
+        document.querySelectorAll('a[href="mailto:[Your Contact Email]"]').forEach(a => a.href = 'mailto:contact@veteriner.ai'); // Updated email domain if needed
+        document.querySelectorAll('a[href="[Your LinkedIn Profile/Company Page]"]').forEach(a => a.href = '#'); // Replace '#' with actual link
+
+    </script>
+</body>
+</html>
